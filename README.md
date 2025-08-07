@@ -1,17 +1,4 @@
-
-
-The idea:
-
-A dart framework that allows me to spin up my typical development workflow using Lua as the scripting language. 
-
-I'd like the following capabilities: 
-- Ability to spin up http and TCP server's / clients with Node express like syntax using Lua  (so basically a routing framework mapped to dart)
-- A PostgreSQL client in lua that maps to a dart postgreSQL client. Keeping the syntax similar to Node style things like the express feature prevously mentioned. 
-- Expandability - Goal is to start adding other features and capabilities as we get going. 
-
-Does this make sense to you? I dont think we should use dart_dardo. I think we'd get the desired result using FFI to map things. If you're following lets sketch up a diagram and road map to add to my readme
-
-
+```
 ┌────────────────────────────────────┐
 │          Dart Framework            │
 │ ────────────────────────────────── │
@@ -31,51 +18,90 @@ Does this make sense to you? I dont think we should use dart_dardo. I think we'd
 │ • Middleware hooks / utilities     │
 └────────────────────────────────────┘
 
- Shared Goals:
- • Node-like DX (developer experience) and API ergonomics  
- • Layered architecture for scalability  
- • Tight client-server parity between Dart and Lua  
-
- ✅ Phase 1: Core MVP
-- [x] Lua HTTP Server using native http and route dispatcher
-- [x] Dart client abstraction with matching route and method structure
-- [x] Basic FFI bridge between Dart and Lua for server lifecycle and calls
-🔄 Phase 2: PostgreSQL Integration
-- [ ] Lua PostgreSQL wrapper (Node-style: pg.connect(), query())
-- [ ] Dart PostgreSQL layer with same method names
-- [ ] Shared query builder module
-🔁 Phase 3: TCP Support & Expansion Hooks
-- [ ] Lua TCP server/client API (basic socket IO, framed messages)
-- [ ] Dart TCP abstraction layer
-- [ ] Expansion interface: register plugins/modules
-📈 Phase 4: Developer Experience
-- [ ] CLI scaffold: dart run create myservice
-- [ ] Hot reload/Live reload from Dart side
-- [ ] Diagnostics & logging from both ends
-🔮 Phase 5: Ecosystem & Add-ons
-- [ ] Auth middleware in Lua (e.g. JWT)
-- [ ] Analytics layer (Dart frontend logging to Lua)
-- [ ] Plugin registry
-
-
-your_dart_project/
+Framework File Structure:
+lua_framework/
 ├── bin/
-│   └── main.dart          ← CLI entry point
+│   └── main.dart              ← Entry point
 ├── lib/
-│   └── lua_bindings.dart  ← FFI bindings and reusable logic
+│   ├── lua_bindings.dart      ← FFI bindings
+│   └── lua_runtime.dart       ← Lua engine class
+├── scripts/
+│   └── init.lua               ← User Lua code
 ├── native/
-│   ├── linux/
-│   │   └── liblua.so
-│   └── windows/
-│       └── lua.dll
-├── pubspec.yaml
+│   ├── windows/lua.dll
+│   └── linux/liblua.so
+```
+Merknader fra byggingen:
+- Last ned lua 5.1.5-kildekoden
+{ Vil feil fra flere koblede main() rydde opp i det for å fortsette - }
+- Bygg lualib.so med make / GCC { Dette er kun for Linux / Android }
+- Bygg lua.dll { bygget med utviklerens PowerShell for vs 2022 }
+- Bygg for MAC: Venter
+- Måtte redigere en linje i luaconf.h for å eksportere dll riktig. -- dette er en hard prosjektavhengighet som må skriptes i byggingen.
+- Antar at liblua.so vil trenge de samme omarbeidingene når vi kommer til Linux-plattformen.
+- Kjør kommandoen på Windows fra prj-roten: "dart run bin/main.dart"
 
-Notes from building: 
-- Download lua 5.1.5 source
-{ Will error from multiple linked main() clean that up to continue - }
-- Build lualib.so with make / GCC { This is linux / android only }
-- Build lua.dll { built using developer powershell for vs 2022 }
-- Build for MAC: Pending
-- Had to edit a line in luaconf.h to export dll properly. -- this is a hard project dependency that will need to be scripted in the build.
-- Assumes the liblua.so will need the same re-works once we hit the linux platform.
-- Run command on windows from prj root: "dart run bin/main.dart"
+
+
+What the UI syntax looks like: 
+```
+app = FlutterApp()
+
+app.page:add(
+  Column {
+    Text("Hello, Lua!"),
+    Button("Click me", on_click = function()
+      print("Button clicked!")
+    end)
+  }
+)
+
+app:run()
+
+
+Vs Native flutter: 
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Hello Lua App',
+      home: HelloLuaWidget(),
+    );
+  }
+}
+
+class HelloLuaWidget extends StatefulWidget {
+  @override
+  _HelloLuaWidgetState createState() => _HelloLuaWidgetState();
+}
+
+class _HelloLuaWidgetState extends State<HelloLuaWidget> {
+  void _handleButtonClick() {
+    print("button clicked");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Hello Lua')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('hello, lua'),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _handleButtonClick,
+              child: Text('Click Me'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```

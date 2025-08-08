@@ -1,23 +1,4 @@
 ```
-┌────────────────────────────────────┐
-│          Dart Framework            │
-│ ────────────────────────────────── │
-│ • CLI tooling & scaffolding        │
-│ • HTTP/TCP client abstraction      │
-│ • Lua FFI bridge manager           │
-│ • Shared config and diagnostics    │
-└──────────────┬─────────────────────┘
-               │ FFI
-               ▼
-┌────────────────────────────────────┐
-│           Lua Microkernel          │
-│ ────────────────────────────────── │
-│ • HTTP/TCP server (Express-style)  │
-│ • Route dispatcher (app.get, etc.) │
-│ • PostgreSQL client                │
-│ • Middleware hooks / utilities     │
-└────────────────────────────────────┘
-
 Framework File Structure:
 lua_framework/
 ├── bin/
@@ -31,19 +12,8 @@ lua_framework/
 │   ├── windows/lua.dll
 │   └── linux/liblua.so
 ```
-Merknader fra byggingen:
-- Last ned lua 5.1.5-kildekoden
-{ Vil feil fra flere koblede main() rydde opp i det for å fortsette - }
-- Bygg lualib.so med make / GCC { Dette er kun for Linux / Android }
-- Bygg lua.dll { bygget med utviklerens PowerShell for vs 2022 }
-- Bygg for MAC: Venter
-- Måtte redigere en linje i luaconf.h for å eksportere dll riktig. -- dette er en hard prosjektavhengighet som må skriptes i byggingen.
-- Antar at liblua.so vil trenge de samme omarbeidingene når vi kommer til Linux-plattformen.
-- Kjør kommandoen på Windows fra prj-roten: "dart run bin/main.dart"
 
-
-
-What the UI syntax looks like: 
+What I expect the UI syntax to look like when complete:
 ```
 app = FlutterApp()
 
